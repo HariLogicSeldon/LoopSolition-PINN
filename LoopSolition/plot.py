@@ -44,14 +44,14 @@ def plot_loop_solition(mesh, preds,file_name):
         t_idx = np.argmin(np.abs(t - t_point))
 
         # 提取真实数据下的 Re(x) 与 |q|
-        x_fixed_t_exact = xx_real[t_idx,:] # 固定t下真实的Re(x)在y方向上的分布
-        q_fixed_t_exact = qq_modulus[t_idx,:]  # 固定t下真实的|q|在y方向上的分布
+        x_fixed_t_exact = xx_real[:,t_idx] # 固定t下真实的Re(x)在y方向上的分布
+        q_fixed_t_exact = qq_modulus[:,t_idx]  # 固定t下真实的|q|在y方向上的分布
         # 绘制真实数据的曲线
         plt.plot(x_fixed_t_exact, q_fixed_t_exact, label=f"Real t={t_point}", linestyle=style)
 
-        # 同样提取预测数据下的 Re(x) 与 |q|
-        x_fixed_t_pred = xx_pred_real[t_idx,:]
-        q_fixed_t_pred = qq_pred_modulus[t_idx,:]
+        # # 同样提取预测数据下的 Re(x) 与 |q|
+        x_fixed_t_pred = xx_pred_real[:,t_idx]
+        q_fixed_t_pred = qq_pred_modulus[:,t_idx]
 
         # 绘制预测数据的曲线 (可以用不同颜色或标记区分)
         plt.plot(x_fixed_t_pred, q_fixed_t_pred, label=f"Pred t={t_point}", linestyle=style, marker='*', markevery=15)
@@ -69,13 +69,13 @@ def plot_loop_solition(mesh, preds,file_name):
     plt.subplot(2, 2, 1)
     plt.imshow(xx_real, cmap='viridis', extent=[t.min(), t.max(), y.min(), y.max()])
     plt.colorbar()
-    plt.title('Re Exact')
+    plt.title('Re(x) Exact')
 
     # xx 模的预测值
     plt.subplot(2, 2, 2)
     plt.imshow(xx_pred_real, cmap='viridis', extent=[t.min(), t.max(), y.min(), y.max()])
     plt.colorbar()
-    plt.title('|xx| Predicted')
+    plt.title('Re(x) Predicted')
 
     # qq 模的原始值
     plt.subplot(2, 2, 3)
@@ -91,51 +91,3 @@ def plot_loop_solition(mesh, preds,file_name):
 
     plt.tight_layout()
     plt.show()
-#
-#
-# ####2 . 曲线图
-#     # 选择某个时间点
-#     time_idx = 90  # 假设选择时间点 t[90]
-#
-#     plt.figure(figsize=(12, 6))
-#
-#     # 实部
-#     plt.subplot(1, 2, 1)
-#     plt.plot(y, xx_real[:, time_idx], label='xx Exact (Real)')
-#     plt.plot(y, xx_pred_real[:, time_idx], '--', label='xx Predicted (Real)')
-#     plt.xlabel('y')
-#     plt.ylabel('Real Part')
-#     plt.legend()
-#     plt.title('Real Part of xx')
-#
-#     # 模
-#     plt.subplot(1, 2, 2)
-#     plt.plot(y, xx_modulus[:, time_idx], label='|xx| Exact')
-#     plt.plot(y, xx_pred_modulus[:, time_idx], '--', label='|xx| Predicted')
-#     plt.xlabel('y')
-#     plt.ylabel('Modulus')
-#     plt.legend()
-#     plt.title('Modulus of xx')
-#
-#     plt.tight_layout()
-# ####3.热力图
-#
-#     fig = plt.figure(figsize=(12, 8))
-#     ax = fig.add_subplot(111,projection='3d')
-#     Y, T = np.meshgrid(y, t)
-#     surface = ax.plot_surface(T, xx_pred_real, qq_pred_modulus, cmap='plasma', edgecolor='none', alpha=0.8, label="Re(x)")
-#     contour = ax.contourf(T, xx_pred_real, qq_pred_modulus,offset=np.min(qq_pred_modulus) - 0.1, zdir='z', cmap='plasma', alpha=0.8)  # 设置热力图投影到 z 平面
-#
-#     # 添加颜色条
-#     cbar = fig.colorbar(surface, ax=ax, shrink=0.5, aspect=10)
-#     cbar.set_label('|q|', fontsize=12)
-#
-#     # 设置轴标签
-#     ax.set_xlabel('t', fontsize=12)
-#     ax.set_ylabel('Re(X)', fontsize=12)
-#     ax.set_zlabel('|q|', fontsize=12)
-#     ax.set_title('3D Plot of Re(x) and |q| with t and Heatmap Projection', fontsize=14)
-#
-#     ax.set_zlim(np.min(qq_pred_modulus) - 0.1, np.max(qq_pred_modulus))
-#     plt.show()
-#

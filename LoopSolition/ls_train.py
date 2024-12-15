@@ -5,7 +5,7 @@ import numpy as np
 import lightning.pytorch as pl
 
 import pinnstorch
-from plot_my import plot_loop_solition
+from plot import plot_loop_solition
 
 
 #定义网格(从数据中)
@@ -15,8 +15,8 @@ def read_data_fn(root_path: str):
     y = data["y"].T  # Spatial variable
     t = data["t"].T # Time variable
 
-    xx = data["xx"]  # Solution xx(y, t)
-    qq = data["qq"]  # Solution qq(y, t)
+    xx = data["xx"].T  # Solution xx(y, t)
+    qq = data["qq"].T # Solution qq(y, t)
     return pinnstorch.data.PointCloudData(
         spatial=[y], time=[t], solution={"xx": xx, "qq": qq}
     )
@@ -39,7 +39,7 @@ in_c = pinnstorch.data.InitialCondition(mesh = mesh,
 #                                                  derivative_order=0,
 #                                                  solution=['xx', 'qq'])
 #collection points and solutions
-N_f = 20000
+N_f = 10000
 me_s = pinnstorch.data.MeshSampler(mesh=mesh,
                                    num_sample=N_f,
                                    collection_points=['f_xx', 'f_qq'])
@@ -49,7 +49,7 @@ val_s = pinnstorch.data.MeshSampler(mesh=mesh,
                                     solution=['xx', 'qq'])
 
 #定义NN
-net = pinnstorch.models.FCN(layers=[2, 100, 100,100,100, 2],
+net = pinnstorch.models.FCN(layers=[2, 20,20,20,20,20,20,20,20, 2],
                             output_names=['xx', 'qq'],
                             lb=mesh.lb,
                             ub=mesh.ub)
@@ -98,7 +98,7 @@ model = pinnstorch.models.PINNModule(net=net,
                                      loss_fn='mse')
 
 #训练
-trainer = pl.Trainer(accelerator='mps', devices=1,max_epochs=10)
+trainer = pl.Trainer(accelerator='mps', devices=1,max_epochs=1000)
 trainer.fit(model=model, datamodule=datamodule)
 #验证
 trainer.validate(model=model, datamodule=datamodule)

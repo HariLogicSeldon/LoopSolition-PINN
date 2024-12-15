@@ -34,6 +34,14 @@ output_data = {
 output_path = 'data/LoopSolition.mat'  # Change path as needed
 scipy.io.savemat(output_path, output_data)
 
+data = scipy.io.loadmat(output_path)
+y = data['y'].flatten()
+t = data['t'].flatten()
+xx_data = data['xx']
+qq_data = data['qq']
+
+# 创建网格
+T, Y = np.meshgrid(t, y)
 
 # Step 5: Plot the results
 XX = xx(Y, T).real  # Re(x)
@@ -93,3 +101,71 @@ plt.show()
 
 # Print confirmation of saved file
 print(f'Data saved to {output_path}')
+
+# Step 5: 从 mat 文件加载数据进行绘图
+# 加载保存的数据
+data = scipy.io.loadmat(output_path)
+y = data['y'].flatten()
+t = data['t'].flatten()
+xx_data = data['xx'].T
+qq_data = data['qq'].T
+
+# 创建网格
+T, Y = np.meshgrid(t, y)
+
+# 准备绘图数据
+XX_plot = xx_data.real  # Re(x)
+QQ_plot = np.abs(qq_data)  # |q|
+
+# 创建3D图
+fig = plt.figure(figsize=(12, 8))
+ax = fig.add_subplot(111, projection='3d')
+
+# 绘制 Re(x), t, |q| 的 surface
+surface = ax.plot_surface(T, XX_plot, QQ_plot, cmap='plasma',
+                         edgecolor='none', alpha=0.8)
+
+# 添加等高热力图
+contour = ax.contourf(T, XX_plot, QQ_plot, zdir='z',
+                      offset=np.min(QQ_plot) - 0.1,
+                      cmap='plasma', alpha=0.8)
+
+# 添加颜色条
+cbar = fig.colorbar(surface, ax=ax, shrink=0.5, aspect=10)
+cbar.set_label('|q|', fontsize=12)
+
+# 设置轴标签
+ax.set_xlabel('t', fontsize=12)
+ax.set_ylabel('Re(X)', fontsize=12)
+ax.set_zlabel('|q|', fontsize=12)
+ax.set_title('3D Plot of Re(x) and |q| with t and Heatmap Projection',
+             fontsize=14)
+
+# 设置 z 轴范围
+ax.set_zlim(np.min(QQ_plot) - 0.1, np.max(QQ_plot))
+
+# Step 6: 生成固定 t 值的 2D 图
+fixed_t_indices = [0, len(t)//2, -1]  # 选择开始、中间和结束的时间点
+line_styles = ['--', '-.', ':']
+
+plt.figure(figsize=(10, 6))
+
+# 对每个固定的 t 值绘制图形
+for t_idx, style in zip(fixed_t_indices, line_styles):
+    t_value = t[t_idx]
+    x_fixed_t = xx_data[:, t_idx].real  # 在固定 t 处的 Re(x)
+    q_fixed_t = np.abs(qq_data[:, t_idx])  # 在固定 t 处的 |q|
+
+    plt.plot(x_fixed_t, q_fixed_t,
+             label=f"t={t_value:.2f}",
+             linestyle=style)
+
+# 添加标签和图例
+plt.xlabel('Re(x)')
+plt.ylabel('|q|')
+plt.title('2D Plot of Re(x) vs |q| at Fixed t and Varying y')
+plt.legend()
+plt.grid(True)
+
+# 显示图形
+plt.show()
