@@ -5,7 +5,7 @@ import numpy as np
 import lightning.pytorch as pl
 
 import pinnstorch
-from plot import plot_loop_solition
+from LoopSolition.utilities.plot import plot_loop_solition
 
 
 #定义网格(从数据中)
@@ -13,10 +13,10 @@ def read_data_fn(root_path: str):
     """Read and preprocess the data from the specified root path."""
     data = pinnstorch.utils.load_data(root_path, "LoopSolition.mat")
     y = data["y"].T  # Spatial variable
-    t = data["t"].T # Time variable
+    t = data["t"].T# Time variable
 
-    xx = data["xx"].T  # Solution xx(y, t)
-    qq = data["qq"].T # Solution qq(y, t)
+    xx = np.array(data["xx"].T,dtype="complex")  # Solution xx(y, t)
+    qq = np.array(data["qq"].T,dtype="complex") # Solution qq(y, t)
     return pinnstorch.data.PointCloudData(
         spatial=[y], time=[t], solution={"xx": xx, "qq": qq}
     )
@@ -32,14 +32,13 @@ in_c = pinnstorch.data.InitialCondition(mesh = mesh,
                                         num_sample = N0,
                                         solution = ['xx', 'qq'])
 
-# ##周期性条件
-# N_b = 50
-# pe_b = pinnstorch.data.PeriodicBoundaryCondition(mesh=mesh,
-#                                                  num_sample=N_b,
-#                                                  derivative_order=0,
-#                                                  solution=['xx', 'qq'])
+# ##边值条件
+N_b = 50
+dr_b = pinnstorch.data.DirichletBoundaryCondition(mesh=mesh,
+                                                 num_sample=N_b,
+                                                 solution=['xx', 'qq'])
 #collection points and solutions
-N_f = 10000
+N_f = 20000
 me_s = pinnstorch.data.MeshSampler(mesh=mesh,
                                    num_sample=N_f,
                                    collection_points=['f_xx', 'f_qq'])
@@ -49,7 +48,7 @@ val_s = pinnstorch.data.MeshSampler(mesh=mesh,
                                     solution=['xx', 'qq'])
 
 #定义NN
-net = pinnstorch.models.FCN(layers=[2, 20,20,20,20,20,20,20,20, 2],
+net = pinnstorch.models.FCN(layers=[2, 100,100,100,100 ,2],
                             output_names=['xx', 'qq'],
                             lb=mesh.lb,
                             ub=mesh.ub)
@@ -85,9 +84,9 @@ def pde_fn(outputs: Dict[str, torch.Tensor],
 
 
 #数据管理 PINNDataModule
-train_datasets = [me_s, in_c]
+train_datasets = [me_s, in_c,dr_b]
 val_dataset = val_s
-datamodule = pinnstorch.data.PINNDataModule(train_datasets=[me_s, in_c],
+datamodule = pinnstorch.data.PINNDataModule(train_datasets=train_datasets,
                                             val_dataset=val_dataset,
                                             pred_dataset=val_s)
 
@@ -98,7 +97,7 @@ model = pinnstorch.models.PINNModule(net=net,
                                      loss_fn='mse')
 
 #训练
-trainer = pl.Trainer(accelerator='mps', devices=1,max_epochs=1000)
+trainer = pl.Trainer(accelerator='mps', devices=1,max_epochs=6)
 trainer.fit(model=model, datamodule=datamodule)
 #验证
 trainer.validate(model=model, datamodule=datamodule)
@@ -108,5 +107,4 @@ preds_list = trainer.predict(model=model, datamodule=datamodule)
 preds_dict = pinnstorch.utils.fix_predictions(preds_list)
 
 plot_loop_solition(mesh=mesh,
-                  preds=preds_dict,
-                  file_name='out')
+                  preds=preds_dict)
