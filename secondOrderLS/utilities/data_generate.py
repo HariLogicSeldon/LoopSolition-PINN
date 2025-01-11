@@ -63,7 +63,7 @@ def qq(y, t):
 
 # Generate grid data
 y = np.linspace(-1.5,1.5, 256)  # Spatial coordinate range [-1.5, 1.5]
-t = np.linspace(-11,11, 256)  # Time coordinate range [-1.5, 1.5]
+t = np.linspace(-1.5,1.5, 256)  # Time coordinate range [-1.5, 1.5]
 Y, T = np.meshgrid(y, t)
 
 # Calculate analytical solutions

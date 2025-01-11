@@ -21,7 +21,7 @@ sampling_points:
   N_b: 50
   N_f: 20000
 training:
-  max_epochs: 10000
+  max_epochs: 15000
   accelerator: mps
   devices: -1
   early_stop: false

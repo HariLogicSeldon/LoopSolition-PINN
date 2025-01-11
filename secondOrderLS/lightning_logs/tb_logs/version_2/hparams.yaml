@@ -1,1 +1,29 @@
-{}
+network:
+  layers:
+  - 2
+  - 20
+  - 20
+  - 20
+  - 20
+  - 20
+  - 20
+  - 20
+  - 20
+  - 4
+  lb:
+  - -1.5
+  - -1.5
+  ub:
+  - 1.5
+  - 1.5
+sampling_points:
+  N0: 50
+  N_b: 50
+  N_f: 20000
+training:
+  accelerator: mps
+  devices: -1
+  early_stop: false
+  max_epochs: 15000
+  patience: 1000
+  scheduler: !!python/name:torch.optim.lr_scheduler.StepLR ''
