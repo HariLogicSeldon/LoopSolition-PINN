@@ -70,8 +70,8 @@ def plot_loop_solition(mesh, preds, logger=None):
     print(f"Data saved to {csv_path}")
 ######## Plot comparisons at fixed time points
     fixed_t = [-1.5, 0, 1.5]
-    line_styles_exact = ['-']  # 实线用于真解
-    line_styles_pred = ['--']  # 虚线用于模拟解
+    line_styles_exact = ['-']
+    line_styles_pred = ['--']
     plt.figure(figsize=(10, 6))
 
     # Plot exact and predicted values at fixed time points
@@ -137,41 +137,41 @@ def plot_loop_solition(mesh, preds, logger=None):
     plt.tight_layout()
     plt.savefig(os.path.join(save_dir, "heatmap.pdf"))
     plt.close()
-####3.三维图像
-    # 创建一个三维坐标轴对象
+####3D image
+
     fig = plt.figure(figsize=(10, 6))
     ax = fig.add_subplot(111, projection='3d')
 
-    # Meshgrid 生成网格数据
+    # Meshgrid
     T, Y = np.meshgrid(t, y)
-    QQ = qq_exact_modulus  # |q| 已经是计算好的数据
+    QQ = qq_exact_modulus
     QQ_pred = qq_pred_modulus
     # print(u_pred.shape,T.shape,Y.shape,QQ.shape,QQ_pred.shape)
 
-    # 绘制 3D 图像
+
     ax.plot_wireframe(T, u_exact, QQ, color='red', linestyle='-', linewidth=0.7)
     surf = ax.plot_surface(T, u_pred, QQ_pred, cmap='viridis', edgecolor='None',alpha=0.7)
-    # 设置三维图像的角度
-    ax.view_init(elev=30, azim=45)  # 仰角30度，方位角45度
+    # Angel
+    ax.view_init(elev=30, azim=45)
 
-    # 添加标题和标签
+    # title and label
     ax.set_title("3D Surface Plot of |q| - Re(x) - t")
     ax.set_xlabel('Time (t)')
     ax.set_ylabel('Space (x)')
     ax.set_zlabel('|q|')
 
-    # 添加图例
+
     legend_elements = [
         plt.Line2D([0], [0], color='red', linestyle='-', linewidth=0.7, label='Exact |q|'),
         plt.Line2D([0], [0], color='purple', marker='o', markersize=8, linestyle='None', label='Predicted |q|')
     ]
     ax.legend(handles=legend_elements, loc='upper right')
 
-    # 添加颜色条
+    # colorbar
     fig.colorbar(surf, shrink=0.5, aspect=5)
     plt.savefig(os.path.join(save_dir, "q_3d_plot.pdf"))
     plt.show()
-    # 保存图片
+    # savefig
     plt.close()
 
 

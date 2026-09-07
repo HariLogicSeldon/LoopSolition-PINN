@@ -3,14 +3,14 @@ from typing import Dict
 import torch
 import numpy as np
 import lightning.pytorch as pl
-
 import pinnstorch
 from lightning.pytorch.loggers import TensorBoardLogger, CSVLogger
-from ShortPulseFunc.utilities.plot import plot_loop_solition
+from TwoSolition.utilities.plot import plot_loop_solition
 from lightning.pytorch.callbacks import EarlyStopping
 
+
 # Define training hyperparameters
-max_epochs = 5000  # Maximum number of epochs
+max_epochs = 20000  # Maximum number of epochs
 device = 'mps'    # Training device
 early_stopping,patience = False,1000  # Early stopping settings
 layers = [2, 20, 20, 20, 20, 20, 20, 20, 20, 4]  # Neural network architecture
@@ -27,12 +27,12 @@ def read_data_fn(root_path: str):
     Returns:
         PointCloudData object containing preprocessed data
     """
-    data = pinnstorch.utils.load_data(root_path, "LoopSolition.mat")
+    data = pinnstorch.utils.load_data(root_path, "MultiSolition.mat")
     y = data["y"].T  # Spatial variable
     t = data["t"].T  # Time variable
     
     # Extract real and imaginary parts
-    noise_level = 0.001
+    # noise_level = 0.001
     u = data["xx"].real.T
     v = data["xx"].imag.T
     p = data["qq"].real.T
@@ -117,7 +117,7 @@ def pde_fn(outputs: Dict[str, torch.Tensor], y: torch.Tensor, t: torch.Tensor):
     outputs["f_u"] = u_yt + 0.5 * pinnstorch.utils.gradient(outputs["p"] ** 2 + outputs["q"] ** 2, y)[0]
     outputs["f_v"] = v_yt
     outputs["f_p"] = p_yt - outputs["p"] * u_y + outputs["q"] * v_y
-    outputs["f_q"] = q_yt - outputs["q"] * u_y - outputs["p"] * v_y
+    outputs["f_q"] = q_yt - outputs["p"] * v_y - outputs["q"] * u_y
     
     return outputs
 
@@ -139,11 +139,13 @@ datamodule = pinnstorch.data.PINNDataModule(
 )
 
 # Create PINN model
+scheduler = torch.optim.lr_scheduler.MultiStepLR
 model = pinnstorch.models.PINNModule(
     net=net,
     pde_fn=pde_fn,
     output_fn=output_fn,
-    loss_fn='mse'
+    loss_fn='mse',
+    scheduler= scheduler
 )
 
 # Record hyperparameters
@@ -163,42 +165,42 @@ hyperparams = {
         "accelerator": device,
         "devices": -1,
         "early_stop": early_stopping,
-        "patience": patience,
-        "Noise_level": 0.001
+        "patience": patience
     }
 }
+if __name__ == "__main__":
+    # Set up early stopping callback
+    early_stop_callback = [EarlyStopping(monitor='val/error_qq', patience=patience,stopping_threshold=0.04)] if early_stopping else None
 
-# Set up early stopping callback
-early_stop_callback = [EarlyStopping(monitor='val/error_qq', patience=patience,stopping_threshold=0.04)] if early_stopping else None
+    # Set up loggers
+    csv_logger = CSVLogger(save_dir="lightning_logs", name="csv_logs")
+    tb_logger = TensorBoardLogger(save_dir="lightning_logs", name="tb_logs")
+    tb_logger.log_hyperparams(hyperparams)
 
-# Set up loggers
-csv_logger = CSVLogger(save_dir="lightning_logs", name="csv_logs")
-tb_logger = TensorBoardLogger(save_dir="lightning_logs", name="tb_logs")
-logger = [csv_logger, tb_logger]
+    logger = [csv_logger, tb_logger]
 
-# Create trainer and start training
-trainer = pl.Trainer(
-    accelerator=device,
-    devices=-1,
-    max_epochs=max_epochs,
-    enable_progress_bar=False,
-    logger=logger,
-    callbacks=early_stop_callback,
-    # fast_dev_run=1
-)
+    # Create trainer and start training
+    trainer = pl.Trainer(
+        accelerator=device,
+        devices=-1,
+        max_epochs=max_epochs,
+        enable_progress_bar=False,
+        logger=logger,
+        callbacks=early_stop_callback,
+        # fast_dev_run=1
+    )
 
-# Train model
-trainer.fit(model=model, datamodule=datamodule)
+    # Train model
+    trainer.fit(model=model, datamodule=datamodule)
 
-# Validate model
-trainer.validate(model=model, datamodule=datamodule)
-#Log
-tb_logger.log_hyperparams(hyperparams)
-# Make predictions and plot results
-preds_list = trainer.predict(model=model, datamodule=datamodule)
-preds_dict = pinnstorch.utils.fix_predictions(preds_list)
-plot_loop_solition(
-    mesh=mesh,
-    preds=preds_dict,
-    logger=logger[1]
-)
+    # Validate model
+    trainer.validate(model=model, datamodule=datamodule)
+
+    # Make predictions and plot results
+    preds_list = trainer.predict(model=model, datamodule=datamodule)
+    preds_dict = pinnstorch.utils.fix_predictions(preds_list)
+    plot_loop_solition(
+        mesh=mesh,
+        preds=preds_dict,
+        logger=logger[1]
+    )

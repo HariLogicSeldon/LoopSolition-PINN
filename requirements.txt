@@ -1,0 +1,10 @@
+# Direct dependencies inferred from source imports; not a validated version lock.
+torch
+lightning
+pinnstorch
+numpy
+scipy
+matplotlib
+pandas
+seaborn
+tensorboard

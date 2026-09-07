@@ -46,6 +46,7 @@ def plot_loop_solition(mesh, preds, logger=None):
     
     # Calculate exact modulus
     qq_exact_modulus = np.sqrt(p_exact**2 + q_exact**2)
+
     # Create a DataFrame
     data = {
         'y': np.tile(y, len(t)),
@@ -68,8 +69,11 @@ def plot_loop_solition(mesh, preds, logger=None):
     csv_path = os.path.join(save_dir, "solution_data.csv")
     df.to_csv(csv_path, index=False)
     print(f"Data saved to {csv_path}")
+
 ######## Plot comparisons at fixed time points
-    fixed_t = [-1.5, 0, 1.5]
+    # fixed_t = [-1.5, 0, 1.5]
+    fixed_t = [-7.5, 1.5, 11.5]
+    # fixed_t_indices = [np.argmin(np.abs(t - value)) for value in fixed_t_values]
     line_styles_exact = ['-']  # 实线用于真解
     line_styles_pred = ['--']  # 虚线用于模拟解
     plt.figure(figsize=(10, 6))

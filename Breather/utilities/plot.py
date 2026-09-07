@@ -2,8 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from pinnstorch.utils.plotting import *
 import os
-import matplotlib.ticker as mticker
 import pandas as pd
+import matplotlib.ticker as mticker
 def plot_loop_solition(mesh, preds, logger=None):
     """Plot comparison between predicted and exact solutions for Loop Soliton
     
@@ -46,6 +46,7 @@ def plot_loop_solition(mesh, preds, logger=None):
     
     # Calculate exact modulus
     qq_exact_modulus = np.sqrt(p_exact**2 + q_exact**2)
+
     # Create a DataFrame
     data = {
         'y': np.tile(y, len(t)),
