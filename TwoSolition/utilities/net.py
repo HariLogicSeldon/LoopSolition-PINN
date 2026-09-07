@@ -1,3 +1,7 @@
+# Derived from PINNs-Torch's FCN implementation.
+# Copyright (c) 2023, Reza Akbarian Bafghi
+# SPDX-License-Identifier: BSD-3-Clause
+# See ../../LICENSES/PINNs-Torch-BSD-3-Clause.txt and ../../THIRD_PARTY_NOTICES.md.
 from typing import Dict, List
 
 import numpy as np

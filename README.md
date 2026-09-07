@@ -1,5 +1,7 @@
 # LoopSolition-PINN
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 基于 PyTorch、Lightning 和 PINNs-Torch 的物理信息神经网络实验项目，用于研究短脉冲相关的环孤子、双孤子、呼吸子与怪波解。每组实验包含解析数据生成、PDE 约束训练和预测可视化。
 
 仓库沿用已有 `Solition` 拼写，以保持路径和导入兼容。当前为研究脚本集合，尚无统一命令行入口或经过验证的依赖锁文件。
@@ -49,4 +51,10 @@ python -m pip install -r requirements.txt
 
 2026-09-07 的整理验证覆盖 Python 语法，以及四份输入数据的键、维度和有限值。当前系统 Python 缺少 PyTorch、Lightning、PINNs-Torch 和 TensorBoard，未执行完整训练，也未验证数值精度或收敛效果。已知实现差异见模型文档。
 
-本项目按私有研究仓库管理，尚未指定开源许可证；第三方依赖遵循各自的许可证。
+## 许可与贡献
+
+本项目原创代码、文档与项目生成的示例数据采用 [MIT License](LICENSE)，允许使用、修改和再分发，包括商业使用；再分发时须保留版权与许可声明，软件按原样提供，不作担保。
+
+`TwoSolition/utilities/net.py` 中源自 PINNs-Torch 的实现保留 BSD-3-Clause 许可；来源、完整声明及外部依赖说明见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+
+欢迎通过 [Issues](https://github.com/HariLogicSeldon/LoopSolition-PINN/issues) 报告问题或提交 Pull Request。参与前请阅读[协作约定](CONTRIBUTING.md)，并在报告数值结果时附上参数、依赖版本和数据说明。
